@@ -16,7 +16,7 @@ const SignInPage = () => {
         if(state === 'Sign Up') {
           e.preventDefault();
           const {data} = await axios.post(BACKEND_URL + '/api/user/register',{name,email,password})
-
+          console.log(data)
           if(data.success) {
             localStorage.setItem('token',data.token)
             setToken(data.token)
@@ -34,13 +34,13 @@ const SignInPage = () => {
           }
         }
       } catch (error) {
-        toast.error(data.message)
+        toast.error(error.response?.data?.message || 'An error occurred')
       }
     } 
 
     useEffect(()=>{
       if(token) {
-        navigate('/')
+        navigate('/session-form')
       }
     },[token])
 

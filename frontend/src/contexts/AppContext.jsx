@@ -9,7 +9,9 @@ const AppContextProvider = (props) => {
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
   const [token, setToken] = useState(localStorage.getItem('token')?localStorage.getItem('token'):false)
     const value = {
-        BACKEND_URL
+        BACKEND_URL,
+        token,
+        setToken
     }
   return (
     <AppContext.Provider value={value}>
