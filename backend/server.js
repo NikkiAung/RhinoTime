@@ -3,6 +3,7 @@ import cors from 'cors'
 import 'dotenv/config'
 import connectDB from './config/mongodb.js'
 import userRouter from './routes/userRoute.js'
+import timesheetRouter from './routes/timesheetRouter.js'
 
 //app config
 const app = express()
@@ -13,8 +14,15 @@ connectDB()
 app.use(express.json())
 app.use(cors())
 
+console.log('Registering routes...')
+
 //localhost:4000/api/user/register
-app.use('/api/user/',userRouter)
+app.use('/api/user',userRouter)
+
+//localhost:4000/api/user/upload-timesheet
+app.use('/api/user',timesheetRouter)
+
+console.log('Routes registered')
 
 //localhost:4000
 app.get('/',(req,res)=>{

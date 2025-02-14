@@ -1,6 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState,useContext } from 'react'
+import axios from 'axios';
+import { AppContext } from '../contexts/AppContext';
+import { useNavigate } from "react-router";
+import { toast } from 'react-toastify';
 
 const TutorSessionFrom = () => {
+  const {BACKEND_URL,token,setToken} = useContext(AppContext)
+  const navigate = useNavigate();
   const daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const [timeSheet, setTimeSheet] = useState({
     Monday: { startTime: '', endTime: '' },
@@ -22,10 +28,21 @@ const TutorSessionFrom = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Submitted timesheet:', timeSheet);
-    // Here you can handle the submission of the timesheet data
+
+    try {
+      console.log(token)
+      const {data} = await axios.post(BACKEND_URL + '/api/user/upload-timesheet',{timeSheet},{headers:{token}});
+      if(data.success) {
+        // navigate('/dashboard')
+        console.log(data.success)
+      } else{
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'An error occurred')
+    }
   };
 
   return (
