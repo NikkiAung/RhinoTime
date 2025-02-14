@@ -35,8 +35,7 @@ const TutorSessionFrom = () => {
       console.log(token)
       const {data} = await axios.post(BACKEND_URL + '/api/user/upload-timesheet',{timeSheet},{headers:{token}});
       if(data.success) {
-        // navigate('/dashboard')
-        console.log(data.success)
+        navigate('/dashboard')
       } else{
         toast.error(data.message)
       }

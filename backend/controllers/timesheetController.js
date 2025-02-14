@@ -1,10 +1,8 @@
 import userModel from '../models/userModel.js';
 
 const uploadTimeSheetData = async (req, res) => {
-    console.log('uploading')
     const { timeSheet, userId } = req.body;
-    console.log(timeSheet)
-    console.log(userId)
+
     try {
       // 1. Validate timeSheet is an object
       if (!timeSheet || typeof timeSheet !== 'object') {
@@ -35,4 +33,24 @@ const uploadTimeSheetData = async (req, res) => {
     }
   };
 
-export {uploadTimeSheetData}  
+const getTimeSheetData = async (req,res) => {
+
+    const {userId} = req.body
+    
+    try {
+        const userData = await userModel.findById(userId).select('-password')
+        console.log(userData)
+        if(!userData){
+            return res.json({success:false,message:"User Doesn't Exist!"})
+        }
+
+        return res.json({ success: true, timeSheet : userData.tutoring_date_and_time });
+
+    } catch (error) {
+        console.log(error);
+        return res.json({ success: false, message: error.message });
+    }
+
+}
+
+export {uploadTimeSheetData,getTimeSheetData}  

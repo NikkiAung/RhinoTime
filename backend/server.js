@@ -19,7 +19,7 @@ console.log('Registering routes...')
 //localhost:4000/api/user/register
 app.use('/api/user',userRouter)
 
-//localhost:4000/api/user/upload-timesheet
+//localhost:4000/api/user/upload-timesheet or get-timesheet
 app.use('/api/user',timesheetRouter)
 
 console.log('Routes registered')
