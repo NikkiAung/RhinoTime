@@ -1,30 +1,19 @@
 import React, { useEffect, useState } from 'react'
 import { useContext } from 'react'
 import { AppContext } from '../contexts/AppContext'
-import axios from 'axios'
-import { toast } from 'react-toastify';
+// import { scheduleZoomMeetings } from '../utils/zoomAutomation'
 
 const Dashboard = () => {
-    const {BACKEND_URL,token,setToken} = useContext(AppContext)
-    
-    const [timeSheet, setTimeSheet] = useState(null);
-
-    const getDateForDashBoard = async () => {
-        try {
-            const {data} = await axios.get(BACKEND_URL + '/api/user/get-timesheet',{headers:{token}})
-            if(data.success) {
-                setTimeSheet(data.timeSheet)
-            } else{
-                toast.error(data.message)
-            }
-        } catch (error) {
-            toast.error(error.response?.data?.message || 'An error occurred')
-        }
-    }
+    const {BACKEND_URL,token,setToken,getDateForDashBoard,timeSheet} = useContext(AppContext)
 
     useEffect(()=>{
         getDateForDashBoard()
     },[token])
+
+    const handleAutomation = () => {
+        // const zoomLink = "https://ccsf-edu.zoom.us/j/92121773277"; // Replace with actual Zoom link
+        // scheduleZoomMeetings(timeSheet, zoomLink);
+    };
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -63,8 +52,11 @@ const Dashboard = () => {
         ))}
       </div>
       <div className="flex justify-center mt-6">
-        <button className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]">
-          Click To Automate?
+        <button 
+            onClick={handleAutomation}
+            className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
+        >
+            Click To Automate?
         </button>
       </div>
     </div>

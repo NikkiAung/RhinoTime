@@ -9,7 +9,7 @@ const SignInPage = () => {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const {BACKEND_URL,token,setToken} = useContext(AppContext)
+  const {BACKEND_URL,token,setToken,timeSheet,getDateForDashBoard} = useContext(AppContext)
   const navigate = useNavigate();
   const formSubmitHandler = async (e) => {
       try {
@@ -39,10 +39,20 @@ const SignInPage = () => {
     } 
 
     useEffect(()=>{
-      if(token) {
-        navigate('/session-form')
+      const checkAndNavigate = async () => {
+        if(token) {
+          await getDateForDashBoard()
+          if (timeSheet === null) {
+            navigate('/session-form')
+          } else if (timeSheet) {
+            navigate('/dashboard')
+          }
+        }
       }
-    },[token])
+      
+      checkAndNavigate();
+      
+    },[token, timeSheet])
 
   return (
     <div className="flex items-center justify-center mt-30">

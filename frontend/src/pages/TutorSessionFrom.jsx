@@ -1,14 +1,14 @@
-import React, { useState,useContext } from 'react'
+import React, { useState,useContext, useEffect } from 'react'
 import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
 import { useNavigate } from "react-router";
 import { toast } from 'react-toastify';
 
 const TutorSessionFrom = () => {
-  const {BACKEND_URL,token,setToken} = useContext(AppContext)
+  const {BACKEND_URL,token,setToken,timeSheet} = useContext(AppContext)
   const navigate = useNavigate();
   const daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  const [timeSheet, setTimeSheet] = useState({
+  const [timeSheetState, setTimeSheet] = useState({
     Monday: { startTime: '', endTime: '' },
     Tuesday: { startTime: '', endTime: '' },
     Wednesday: { startTime: '', endTime: '' },
@@ -17,6 +17,12 @@ const TutorSessionFrom = () => {
     Saturday: { startTime: '', endTime: '' },
     Sunday: { startTime: '', endTime: '' }
   });
+
+  useEffect(() => {
+    if (timeSheet && timeSheet !== null) {
+      navigate('/dashboard');
+    }
+  }, [timeSheet]);
 
   const handleTimeChange = (day, field, value) => {
     setTimeSheet(prev => ({
@@ -30,10 +36,11 @@ const TutorSessionFrom = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    console.log(timeSheetState)
     try {
       console.log(token)
-      const {data} = await axios.post(BACKEND_URL + '/api/user/upload-timesheet',{timeSheet},{headers:{token}});
+      const {data} = await axios.post(BACKEND_URL + '/api/user/upload-timesheet',{timeSheet : timeSheetState},{headers:{token}});
+      console.log(data)
       if(data.success) {
         navigate('/dashboard')
       } else{
@@ -59,19 +66,19 @@ const TutorSessionFrom = () => {
             <div className='font-medium'>{day}</div>
             <input
               type="time"
-              value={timeSheet[day].startTime}
+              value={timeSheetState[day].startTime}
               onChange={(e) => handleTimeChange(day, 'startTime', e.target.value)}
               className='p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500'
             />
             <input
               type="time"
-              value={timeSheet[day].endTime}
+              value={timeSheetState[day].endTime}
               onChange={(e) => handleTimeChange(day, 'endTime', e.target.value)}
               className='p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500'
             />
             <div className='text-sm text-gray-500'>
-              {timeSheet[day].startTime && timeSheet[day].endTime && 
-                `${timeSheet[day].startTime} - ${timeSheet[day].endTime}`}
+              {timeSheetState[day].startTime && timeSheetState[day].endTime && 
+                `${timeSheetState[day].startTime} - ${timeSheetState[day].endTime}`}
             </div>
           </div>
         ))}
