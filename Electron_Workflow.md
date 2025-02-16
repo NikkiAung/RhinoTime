@@ -1,6 +1,6 @@
 # Electron Workflow
 
-## Unlike website, ELECTRON is run on two separate environments/worlds
+### Unlike website, ELECTRON is run on two separate environments/worlds
 * Main World for UI Web Content
 * Isolated World for Main Process (Node.js Backend) 
 
