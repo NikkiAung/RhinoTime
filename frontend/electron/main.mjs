@@ -2,6 +2,7 @@ import { app, BrowserWindow,ipcMain, shell } from 'electron'
 import path from 'path'
 import { fileURLToPath } from 'url';
 import cron from 'node-cron'
+import { exec } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,15 +32,58 @@ function createWindow() {
   }
 }
 
+// Function to convert days to cron format (Sunday = 0, Monday = 1, etc.)
+function getCronDay(day) {
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  return days.indexOf(day);
+}
+
+// Function to Close Zoom
+function closeZoom() {
+  console.log("Attempting to close Zoom...");
+  if (process.platform === "win32") {
+    exec("taskkill /F /IM Zoom.exe", (error, stdout, stderr) => {
+      if (error) {
+          console.error("Error closing Zoom:", stderr);
+      } else {
+          console.log("Zoom closed successfully.");
+      }
+    });
+  } else {
+    console.log('closing from macOS')
+    exec("pkill zoom", (error, stdout, stderr) => {
+      if (error) {
+          console.error("Error closing Zoom:", stderr);
+      } else {
+          console.log("Zoom closed successfully.");
+      }
+  });
+  }
+}
+
 app.whenReady().then(() => {
   createWindow()
   
   ipcMain.on('schedule-zoom', (event, timeSheet, zoomLink) => {
     console.log("Scheduling Zoom:", timeSheet);
-    shell.openExternal(zoomLink); // ✅ Safe operation
-  });
+    // shell.openExternal(zoomLink); // ✅ Safe operation
+    for (const [day, { startTime, endTime }] of Object.entries(timeSheet)) {
+      const [startHour, startMinute] = startTime.split(":").map(Number);
+      const [endHour, endMinute] = endTime.split(":").map(Number);
 
-  app.on('activate', () => {
+      cron.schedule(`${startMinute} ${startHour} * * ${getCronDay(day)}`, () => {
+        console.log(`Starting Zoom Meeting for ${day} at ${startTime}`);
+        shell.openExternal(zoomLink);
+      });
+
+      cron.schedule(`${endMinute} ${endHour} * * ${getCronDay(day)}`, () => {
+        console.log(`Closing Zoom Meeting for ${day} at ${endTime}`);
+        closeZoom();
+      });
+    }
+});
+
+app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow()
     }
