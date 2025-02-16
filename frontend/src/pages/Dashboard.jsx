@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useContext } from 'react'
 import { AppContext } from '../contexts/AppContext'
-// import { scheduleZoomMeetings } from '../utils/zoomAutomation'
+import { scheduleZoomMeetings } from '../utils/zoomAutomation'
 
 const Dashboard = () => {
     const {BACKEND_URL,token,setToken,getDateForDashBoard,timeSheet} = useContext(AppContext)
@@ -11,8 +11,8 @@ const Dashboard = () => {
     },[token])
 
     const handleAutomation = () => {
-        // const zoomLink = "https://ccsf-edu.zoom.us/j/92121773277"; // Replace with actual Zoom link
-        // scheduleZoomMeetings(timeSheet, zoomLink);
+        const zoomLink = "https://ccsf-edu.zoom.us/j/92121773277"; // Replace with actual Zoom link
+        scheduleZoomMeetings(timeSheet, zoomLink);
     };
 
   return (
