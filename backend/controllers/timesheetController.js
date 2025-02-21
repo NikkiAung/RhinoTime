@@ -54,4 +54,31 @@ const getTimeSheetData = async (req,res) => {
 
 }
 
-export {uploadTimeSheetData,getTimeSheetData}  
+const updateTimeSheetData = async (req, res) => {
+    try {
+        const { userId, day, field, value } = req.body;
+
+        if (!userId || !day || !field || value === undefined) {
+            return res.status(400).json({ success: false, message: "Missing required fields." });
+        }
+
+        // MongoDB update query to modify only the specific field
+        const updatedUser = await userModel.findByIdAndUpdate(
+            userId,
+            { $set: { [`tutoring_date_and_time.${day}.${field}`]: value } }, 
+            { new: true, runValidators: true } // `new: true` returns the updated document
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ success: false, message: "User not found." });
+        }
+
+        return res.json({ success: true, message: "Time updated successfully!" });
+
+    } catch (error) {
+        console.error("Error updating time:", error);
+        return res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+};
+
+export {uploadTimeSheetData,getTimeSheetData,updateTimeSheetData}  

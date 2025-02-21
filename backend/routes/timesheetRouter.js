@@ -6,7 +6,7 @@ const timesheetRouter = express.Router();
 
 timesheetRouter.post('/upload-timesheet',authUser,uploadTimeSheetData)
 timesheetRouter.get('/get-timesheet',authUser,getTimeSheetData)
-timesheetRouter.get('/update-timesheet',authUser,updateTimeSheetData)
+timesheetRouter.post('/update-timesheet',authUser,updateTimeSheetData)
 
 export default timesheetRouter
 

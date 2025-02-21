@@ -4,6 +4,8 @@ import { AppContext } from '../contexts/AppContext'
 import { scheduleZoomMeetings } from '../utils/zoomAutomation'
 import OverTimeDashboard from './OverTimeDashboard'
 import AddOverTime from './AddOverTime'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
 const Dashboard = () => {
     const {BACKEND_URL,token,setToken,getDateForDashBoard,timeSheet} = useContext(AppContext)
@@ -12,11 +14,26 @@ const Dashboard = () => {
     const [showOvertimeView, setShowOvertimeView] = useState(false);
     const [editingTime, setEditingTime] = useState(null); 
 
-    const handleTimeEdit = (day, field, value) => {
+    const handleTimeEdit = async (day, field, value) => {
       // Here you would update the time in your backend
       // Updating startTime for Monday to 15:00
       console.log(`Updating ${field} for ${day} to ${value}`);
       setEditingTime(null);
+      try {
+        const {data} = await axios.post(BACKEND_URL + '/api/user/update-timesheet',{
+          day,
+          field,
+          value
+        },{headers:{token}})
+        if(data.success){
+            toast.success('Time updated successfully')
+            getDateForDashBoard()
+        }else{
+            toast.error('Error updating time')
+        }
+      } catch (error) {
+        toast.error(error.response?.data?.message || 'An error occurred')
+      }
 
     };
 
