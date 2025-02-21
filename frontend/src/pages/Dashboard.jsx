@@ -10,6 +10,15 @@ const Dashboard = () => {
     const [addOverTime, setAddOverTime] = useState(false);
     const [selectedDay, setSelectedDay] = useState(null);
     const [showOvertimeView, setShowOvertimeView] = useState(false);
+    const [editingTime, setEditingTime] = useState(null); 
+
+    const handleTimeEdit = (day, field, value) => {
+      // Here you would update the time in your backend
+      // Updating startTime for Monday to 15:00
+      console.log(`Updating ${field} for ${day} to ${value}`);
+      setEditingTime(null);
+
+    };
 
     // Sample overtime data
     const overtimeData = {
@@ -70,7 +79,27 @@ const Dashboard = () => {
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <span className="font-medium">Start:</span>
-                  <span className="ml-2">{formatTime(times.startTime)}</span>
+                  {editingTime === `${day}-start` ? (
+                        <input
+                            type="time"
+                            defaultValue={times.startTime}
+                            className="ml-2 px-2 py-1 border rounded-md text-sm"
+                            autoFocus
+                            onBlur={(e) => handleTimeEdit(day, 'startTime', e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    handleTimeEdit(day, 'startTime', e.target.value);
+                                }
+                            }}
+                        />
+                    ) : (
+                        <span 
+                            className="ml-2 cursor-pointer hover:bg-gray-100 px-2 py-1 rounded"
+                            onDoubleClick={() => setEditingTime(`${day}-start`)}
+                        >
+                            {formatTime(times.startTime)}
+                        </span>
+                    )}
                 </div>
                 {/* End Time */}
                 <div className="flex items-center text-gray-600">
@@ -79,12 +108,30 @@ const Dashboard = () => {
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <span className="font-medium">End:</span>
-                  <span className="ml-2">{formatTime(times.endTime)}</span>
+                    {editingTime === `${day}-end` ? (
+                        <input
+                            type="time"
+                            defaultValue={times.endTime}
+                            className="ml-2 px-2 py-1 border rounded-md text-sm"
+                            autoFocus
+                            onBlur={(e) => handleTimeEdit(day, 'endTime', e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    handleTimeEdit(day, 'endTime', e.target.value);
+                                }
+                            }}
+                        />
+                    ) : (
+                        <span 
+                            className="ml-2 cursor-pointer hover:bg-gray-100 px-2 py-1 rounded"
+                            onDoubleClick={() => setEditingTime(`${day}-end`)}
+                        >
+                            {formatTime(times.endTime)}
+                        </span>
+                    )}
                 </div>
               </div>
-
-
-              {/* overTime Div */}
+              {/* AddOverTime + ShowOverTime Div */}
               <div>
                   <button 
                       onClick={() => {
@@ -113,10 +160,11 @@ const Dashboard = () => {
                       </button>
                   )}
               </div>
+            </div>
+          
           </div>
-        </div>
         ))}
-      </div>
+    </div>
 
       {/* OverTimeDashboard */}
       {showOvertimeView && 
