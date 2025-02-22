@@ -1,6 +1,37 @@
-import React from 'react'
+import { useState, useContext } from "react"
+import axios from "axios"
+import { AppContext } from '../contexts/AppContext'
+import { toast } from 'react-toastify'
 
 const AddOverTime = ({selectedDay,setAddOverTime}) => {
+  const [startTime, setStartTime] = useState("")
+  const [endTime, setEndTime] = useState("")
+  const [date, setDate] = useState("")
+  const {BACKEND_URL,token,setToken,getDateForDashBoard,timeSheet} = useContext(AppContext)
+
+  const AddOverTime = async (e) => {
+    e.preventDefault()
+    const newOverTime = {
+      [selectedDay] : {
+        date: date,
+        startTime: startTime,
+        endTime: endTime,
+      }
+    }
+    try {
+      const {data} = await axios.post(BACKEND_URL + '/api/user/upload-overtime',{newOverTime},{headers:{token}})
+      console.log(data)
+      if(data.success){
+        setAddOverTime(false)
+        getDateForDashBoard()
+        toast.success(data.message)
+      } else{
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'An error occurred')
+    }
+  }
   return (
     <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center p-4 z-50">
           <div className="bg-white/80 backdrop-blur-md rounded-lg p-6 w-full max-w-md shadow-xl border border-white/20">
@@ -16,12 +47,13 @@ const AddOverTime = ({selectedDay,setAddOverTime}) => {
               </button>
             </div>
             
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={AddOverTime}>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
                 <input 
                   type="date" 
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => setDate(e.target.value)}
                 />
               </div>
 
@@ -30,6 +62,7 @@ const AddOverTime = ({selectedDay,setAddOverTime}) => {
                 <input 
                   type="time" 
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => setStartTime(e.target.value)}
                 />
               </div>
               
@@ -38,6 +71,7 @@ const AddOverTime = ({selectedDay,setAddOverTime}) => {
                 <input 
                   type="time" 
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => setEndTime(e.target.value)}
                 />
               </div>
               

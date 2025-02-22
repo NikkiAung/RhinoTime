@@ -9,5 +9,3 @@ timesheetRouter.get('/get-timesheet',authUser,getTimeSheetData)
 timesheetRouter.post('/update-timesheet',authUser,updateTimeSheetData)
 
 export default timesheetRouter
-
-//localhost:4000/api/user/upload-timesheet 

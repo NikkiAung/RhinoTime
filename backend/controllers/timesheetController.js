@@ -8,7 +8,6 @@ const uploadTimeSheetData = async (req, res) => {
       if (!timeSheet || typeof timeSheet !== 'object') {
         return res.json({ success: false, message: 'Invalid timeSheet format' });
       }
-    console.log(timeSheet)
   
       // 2. Check each day’s start/end time
       for (const [day, { startTime, endTime }] of Object.entries(timeSheet)) {
@@ -40,7 +39,6 @@ const getTimeSheetData = async (req,res) => {
 
     try {
         const userData = await userModel.findById(userId).select('-password')
-        console.log(userData)
         if(!userData){
             return res.json({success:false,message:"User Doesn't Exist!"})
         }
