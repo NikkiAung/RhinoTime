@@ -6,14 +6,18 @@ import OverTimeDashboard from './OverTimeDashboard'
 import AddOverTime from './AddOverTime'
 import axios from 'axios'
 import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
-    const {BACKEND_URL,token,setToken,getDateForDashBoard,timeSheet} = useContext(AppContext)
+    const {BACKEND_URL,token,setToken,getDateForDashBoard,timeSheet, setTimeSheet} = useContext(AppContext)
     const [addOverTime, setAddOverTime] = useState(false);
     const [selectedDay, setSelectedDay] = useState(null);
     const [showOvertimeView, setShowOvertimeView] = useState(false);
     const [editingTime, setEditingTime] = useState(null); 
+    const [overtimeData,setOvertimeData] = useState({});
+    const navigate = useNavigate();
 
+    // updating main time sheet
     const handleTimeEdit = async (day, field, value) => {
       // Here you would update the time in your backend
       // Updating startTime for Monday to 15:00
@@ -32,27 +36,57 @@ const Dashboard = () => {
             toast.error('Error updating time')
         }
       } catch (error) {
-        toast.error(error.response?.data?.message || 'An error occurred')
+        toast.error(error.message)
       }
 
     };
 
-    // Sample overtime data
-    const overtimeData = {
-        Monday: [
-            { date: '2024-01-15', startTime: '17:00', endTime: '19:00'},
-            { date: '2024-01-22', startTime: '16:30', endTime: '18:30'}
-        ],
-        Tuesday: [
-            { date: '2024-01-16', startTime: '15:00', endTime: '17:00'}
-        ],
-        Wednesday: [
-            { date: '2024-01-17', startTime: '14:00', endTime: '16:00'}
-        ]
+    // getOvertimeData
+    const getOvertimeData = async () => {
+      try {
+        const {data} = await axios.get(BACKEND_URL + '/api/user/get-overtime',{headers:{token}})
+        if(data.success){
+          setOvertimeData(data.overtimeSheet)
+        }else{
+          console.log('else',data.message)
+          toast.error(data.message)
+        }
+      } catch (error) {
+        console.log('catch',error.message)
+        toast.error(error.message)
+      }
+    }
+
+    // delete all time
+    // Fix the deleteAllTime function
+    const deleteAllTime = async () => {
+        try {
+            const userId = JSON.parse(localStorage.getItem('userId'));
+            const { data } = await axios.post(
+                BACKEND_URL + '/api/user/delete-all-times',
+                {}, // Empty body since userId will be extracted from token in middleware
+                { 
+                    headers: { 
+                        token: token // Send token properly in headers
+                    } 
+                }
+            );
+    
+            if(data.success){
+                setTimeSheet(null); // Reset 
+                toast.success('All times deleted successfully')
+                navigate('/session-form')
+            } else {
+                toast.error(data.message)
+            }
+        } catch (error) {
+          toast.error(error.message)
+        }
     };
 
     useEffect(()=>{
         getDateForDashBoard()
+        getOvertimeData(); 
     },[token])
 
     const handleAutomation = () => {
@@ -67,6 +101,7 @@ const Dashboard = () => {
         <h1 className="font-serif text-3xl font-bold text-gray-800 mb-6">Tutoring Schedule</h1>
         <div 
           className="bg-red-500 px-4 py-1 rounded-full text-white font-semibold text-lg shadow-md transition duration-300 ease-in-out transform hover:bg-red-600 hover:scale-105 active:scale-95 focus:ring-4 focus:ring-red-300 cursor-pointer select-none"
+          onClick={deleteAllTime}
         >
           🗑️ Delete All Schedule?
         </div>
@@ -191,6 +226,7 @@ const Dashboard = () => {
           calculateDuration={calculateDuration} 
           formatTime={formatTime}
           setShowOvertimeView={setShowOvertimeView}
+          getOvertimeData={getOvertimeData}
         />
       }
 
@@ -199,6 +235,7 @@ const Dashboard = () => {
         <AddOverTime
           selectedDay={selectedDay}
           setAddOverTime={setAddOverTime}
+          getOvertimeData={getOvertimeData}
         />
       )}
       
@@ -218,6 +255,7 @@ const Dashboard = () => {
 }
 
 const formatTime = (time) => {
+  if (time === "00:00") return "00:00";
   const [hours, minutes] = time.split(':');
   const period = hours >= 12 ? 'PM' : 'AM';
   const formattedHours = hours % 12 || 12;

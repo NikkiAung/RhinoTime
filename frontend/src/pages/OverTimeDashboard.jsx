@@ -1,9 +1,33 @@
-import React from 'react'
+import { toast } from "react-toastify"
+import { useContext } from "react"
+import { AppContext } from "../contexts/AppContext"
+import axios from "axios"
 
-const OverTimeDashboard = ({selectedDay,overtimeData,calculateDuration,formatTime,setShowOvertimeView}) => {
+const OverTimeDashboard = ({selectedDay,overtimeData,calculateDuration,formatTime,setShowOvertimeView,getOvertimeData}) => {
+    const {BACKEND_URL,token,setToken,getDateForDashBoard,timeSheet,setTimeSheet} = useContext(AppContext)
+
+    const handleOverTimeDelete = async (entry) => {
+      try {
+        const {data} = await axios.post(BACKEND_URL+'/api/user/delete-overtime', {
+          selectedDay,
+          date: entry.date,
+          startTime: entry.startTime,
+          endTime: entry.endTime
+        },{headers:{token}})
+        if(data.success){
+          toast.success(data.message)
+          getOvertimeData()
+        } else{
+          toast.error(data.message)
+        }
+      } catch (error) {
+        toast.error(error.message)
+      }
+    }
+
   return (
     <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center p-4 z-50">
-              <div className="bg-white/90 backdrop-blur-md rounded-xl p-6 w-full max-w-2xl shadow-xl border border-white/20">
+              <div className="bg-white/90 backdrop-blur-md rounded-xl p-6 w-full max-w-2xl shadow-xl border border-white/20 max-h-[80vh] flex flex-col">
                   <div className="flex justify-between items-center mb-6">
                       <h2 className="text-2xl font-bold text-gray-800">Overtime Hours - {selectedDay}</h2>
                       <button 
@@ -16,7 +40,7 @@ const OverTimeDashboard = ({selectedDay,overtimeData,calculateDuration,formatTim
                       </button>
                   </div>
   
-                  <div className="space-y-4">
+                  <div className="space-y-4 overflow-y-auto pr-2">
                       {overtimeData[selectedDay]?.map((entry, index) => (
                           <div key={index} className="bg-white/50 backdrop-blur-sm p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                               <div className="flex justify-between items-start">
@@ -25,13 +49,20 @@ const OverTimeDashboard = ({selectedDay,overtimeData,calculateDuration,formatTim
                                       {calculateDuration(entry.startTime, entry.endTime)}
                                   </div>
                               </div>
-                              <div className="mt-3 space-y-2">
+                              <div className="mt-3 space-y-2 flex justify-between items-center">
                                   <div className="flex items-center text-gray-600">
                                       <span className="font-medium">Time:</span>
                                       <span className="ml-2">
                                           {formatTime(entry.startTime)} - {formatTime(entry.endTime)}
                                       </span>
                                   </div>
+                                  <button 
+                                        onClick={() => handleOverTimeDelete(entry)}
+                                        className="bg-red-500 text-white px-3 py-1 rounded-md text-sm font-medium shadow-md transition-all 
+                                        hover:bg-red-600 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-red-300"
+                                    >
+                                        🗑️ Delete
+                                  </button>
                               </div>
                           </div>
                       ))}

@@ -3,7 +3,7 @@ import axios from "axios"
 import { AppContext } from '../contexts/AppContext'
 import { toast } from 'react-toastify'
 
-const AddOverTime = ({selectedDay,setAddOverTime}) => {
+const AddOverTime = ({selectedDay,setAddOverTime,getOvertimeData}) => {
   const [startTime, setStartTime] = useState("")
   const [endTime, setEndTime] = useState("")
   const [date, setDate] = useState("")
@@ -24,12 +24,13 @@ const AddOverTime = ({selectedDay,setAddOverTime}) => {
       if(data.success){
         setAddOverTime(false)
         getDateForDashBoard()
+        getOvertimeData()
         toast.success(data.message)
       } else{
         toast.error(data.message)
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'An error occurred')
+      toast.error(error.message)
     }
   }
   return (

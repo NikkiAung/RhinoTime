@@ -23,7 +23,7 @@ const AppContextProvider = (props) => {
         }
     } catch (error) {
         setTimeSheet(null)
-        toast.error(error.response?.data?.message || 'An error occurred')
+        toast.error(error.message)
     }
 }
 
@@ -32,7 +32,8 @@ const AppContextProvider = (props) => {
         token,
         setToken,
         getDateForDashBoard,
-        timeSheet
+        timeSheet,
+        setTimeSheet
     }
   return (
     <AppContext.Provider value={value}>

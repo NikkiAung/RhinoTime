@@ -34,7 +34,7 @@ const SignInPage = () => {
           }
         }
       } catch (error) {
-        toast.error(error.response?.data?.message || 'An error occurred')
+        toast.error(error.message)
       }
     } 
 

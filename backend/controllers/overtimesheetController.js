@@ -67,4 +67,59 @@ const uploadOvertimeSheetData = async (req, res) => {
 };
 
 
-export { uploadOvertimeSheetData };
+const getOvertimeSheetData = async (req, res) => {
+    try {
+        const { userId } = req.body;
+        if (!userId) {
+            return res.json({ success: false, message: 'Invalid request data' });
+        }
+        // Find user
+        const user = await userModel.findById(userId).select('-password');
+        if (!user) {
+            return res.json({ success: false, message: 'User not found' });
+        }
+        return res.json({ success: true, message: 'Overtime sheet fetched successfully', overtimeSheet: user.tutoring_overtime });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+};
+
+const delOvertimeSheetData = async (req, res) => {
+    try {
+        const { userId, date, startTime, endTime, selectedDay } = req.body;
+
+        if (!userId || !date || !startTime || !endTime || !selectedDay) {
+            return res.json({ success: false, message: 'Invalid request data' });
+        }
+
+        // Find user
+        const user = await userModel.findById(userId).select('-password');;
+        if (!user) {
+            return res.json({ success: false, message: 'User not found' });
+        }
+
+        // Check if the selectedDay exists in tutoring_overtime
+        if (!user.tutoring_overtime[selectedDay]) {
+            return res.json({ success: false, message: `No overtime records for ${selectedDay}` });
+        }
+
+        // Filter out the specific overtime entry
+        const updatedOvertime = user.tutoring_overtime[selectedDay].filter(
+            entry => !(entry.date === date && entry.startTime === startTime && entry.endTime === endTime)
+        );
+
+        // Update the user document
+        await userModel.findByIdAndUpdate(userId, {
+            $set: { [`tutoring_overtime.${selectedDay}`]: updatedOvertime }
+        }, { new: true });
+
+        return res.json({ success: true, message: 'Overtime entry deleted successfully' });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+};
+
+export { uploadOvertimeSheetData, getOvertimeSheetData, delOvertimeSheetData };
