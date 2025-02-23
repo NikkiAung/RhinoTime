@@ -69,7 +69,7 @@ const updateTimeSheetData = async (req, res) => {
             userId,
             { $set: { [`tutoring_date_and_time.${day}.${field}`]: value } }, 
             { new: true, runValidators: true } // `new: true` returns the updated document
-        ).select('-password'); ;
+        ).select('-password');
 
         if (!updatedUser) {
             return res.status(404).json({ success: false, message: "User not found." });
@@ -102,7 +102,7 @@ const delTimeSheetData = async (req, res) => {
               } 
           },
           { new: true, runValidators: true }
-        );
+        ).select('-password');
         
       if (!updatedUser) {
         return res.status(404).json({ success: false, message: "User not found" });

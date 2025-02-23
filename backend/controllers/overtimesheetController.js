@@ -24,7 +24,7 @@ const uploadOvertimeSheetData = async (req, res) => {
         }
 
         // Find user
-        const user = await userModel.findById(userId);
+        const user = await userModel.findById(userId).select('-password');
         if (!user) {
             return res.json({ success: false, message: 'User not found' });
         }
@@ -56,7 +56,7 @@ const uploadOvertimeSheetData = async (req, res) => {
             userId,
             { $set: { tutoring_overtime: updatedOvertime } },
             { new: true, runValidators: true }
-        );
+        ).select('-password');
 
         return res.json({ success: true, message: 'Overtime sheet updated successfully', updatedUser });
 
@@ -112,7 +112,7 @@ const delOvertimeSheetData = async (req, res) => {
         // Update the user document
         await userModel.findByIdAndUpdate(userId, {
             $set: { [`tutoring_overtime.${selectedDay}`]: updatedOvertime }
-        }, { new: true });
+        }, { new: true }).select('-password');
 
         return res.json({ success: true, message: 'Overtime entry deleted successfully' });
 

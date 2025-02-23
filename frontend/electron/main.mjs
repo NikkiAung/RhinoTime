@@ -64,22 +64,51 @@ function closeZoom() {
 app.whenReady().then(() => {
   createWindow()
   
-  ipcMain.on('schedule-zoom', (event, timeSheet, zoomLink) => {
-    console.log("Scheduling Zoom:", timeSheet);
-    // shell.openExternal(zoomLink); // ✅ Safe operation
-    for (const [day, { startTime, endTime }] of Object.entries(timeSheet)) {
-      const [startHour, startMinute] = startTime.split(":").map(Number);
-      const [endHour, endMinute] = endTime.split(":").map(Number);
+  ipcMain.on('schedule-zoom', (event, timeSheet, overtimeData, zoomLink) => {
 
-      cron.schedule(`${startMinute} ${startHour} * * ${getCronDay(day)}`, () => {
-        console.log(`Starting Zoom Meeting for ${day} at ${startTime}`);
-        shell.openExternal(zoomLink);
-      });
+    try {
+      // mainTime cron
+      for (const [day, { startTime, endTime }] of Object.entries(timeSheet)) {
+        if(startTime === '00:00' && endTime === '00:00') {
+          continue;
+        }
+        const [startHour, startMinute] = startTime.split(":").map(Number);
+        const [endHour, endMinute] = endTime.split(":").map(Number);
+  
+        cron.schedule(`${startMinute} ${startHour} * * ${getCronDay(day)}`, () => {
+          console.log(`Starting Zoom Meeting for ${day} at ${startTime}`);
+          shell.openExternal(zoomLink);
+        });
+  
+        cron.schedule(`${endMinute} ${endHour} * * ${getCronDay(day)}`, () => {
+          console.log(`Closing Zoom Meeting for ${day} at ${endTime}`);
+          closeZoom();
+        });
+      }
+      // overTime cron
+      for (const [day, overtimeEntries] of Object.entries(overtimeData)) {
+        overtimeEntries.forEach(({ date, startTime, endTime }) => {
+          const [startHour, startMinute] = startTime.split(":").map(Number);
+          const [endHour, endMinute] = endTime.split(":").map(Number);
+          
+          const [year, month, dayNum] = date.split("-").map(Number);
+  
+          cron.schedule(`${startMinute} ${startHour} ${dayNum} ${month} *`, () => {
+            console.log(`Starting Overtime Zoom Meeting on ${date} at ${startTime}`);
+            shell.openExternal(zoomLink);
+          });
+  
+          cron.schedule(`${endMinute} ${endHour} ${dayNum} ${month} *`, () => {
+            console.log(`Closing Overtime Zoom Meeting on ${date} at ${endTime}`);
+            closeZoom();
+          });
+        });
+      }
 
-      cron.schedule(`${endMinute} ${endHour} * * ${getCronDay(day)}`, () => {
-        console.log(`Closing Zoom Meeting for ${day} at ${endTime}`);
-        closeZoom();
-      });
+      // Send confirmation back to renderer
+      event.reply('schedule-confirm', { success: true });
+    } catch (error) {
+      event.reply('schedule-confirm', { success: false, error: error.message });
     }
 });
 

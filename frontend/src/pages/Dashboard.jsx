@@ -16,6 +16,7 @@ const Dashboard = () => {
     const [editingTime, setEditingTime] = useState(null); 
     const [overtimeData,setOvertimeData] = useState({});
     const navigate = useNavigate();
+    const [isAutomated, setIsAutomated] = useState(false);
 
     // updating main time sheet
     const handleTimeEdit = async (day, field, value) => {
@@ -61,7 +62,6 @@ const Dashboard = () => {
     // Fix the deleteAllTime function
     const deleteAllTime = async () => {
         try {
-            const userId = JSON.parse(localStorage.getItem('userId'));
             const { data } = await axios.post(
                 BACKEND_URL + '/api/user/delete-all-times',
                 {}, // Empty body since userId will be extracted from token in middleware
@@ -89,9 +89,19 @@ const Dashboard = () => {
         getOvertimeData(); 
     },[token])
 
-    const handleAutomation = () => {
+    useEffect(()=> {
+      setIsAutomated(false)
+    },[overtimeData,timeSheet])
+    const handleAutomation = async () => {
         const zoomLink = "https://ccsf-edu.zoom.us/j/92121773277"; // Replace with actual Zoom link
-        scheduleZoomMeetings(timeSheet, zoomLink);
+        // scheduleZoomMeetings(timeSheet, overtimeData, zoomLink);
+        try {
+          await scheduleZoomMeetings(timeSheet, overtimeData, zoomLink);
+          setIsAutomated(true);
+          toast.success('Zoom meetings scheduled successfully!');
+        } catch (error) {
+            toast.error(error.message);
+        }
     };
 
   return (
@@ -244,9 +254,14 @@ const Dashboard = () => {
         <div className="flex justify-center mt-6">
           <button 
               onClick={handleAutomation}
-              className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-transparent px-6 font-medium text-neutral-600 transition-all duration-100 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]"
+              disabled={isAutomated}
+              className={`group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md border px-6 font-medium transition-all duration-100 ${
+                isAutomated 
+                  ? 'bg-gradient-to-r from-green-400 to-green-500 text-white cursor-not-allowed border-green-400 shadow-lg hover:shadow-green-200/50' 
+                  : 'border-neutral-200 bg-transparent text-neutral-600 [box-shadow:5px_5px_rgb(82_82_82)] active:translate-x-[3px] active:translate-y-[3px] active:[box-shadow:0px_0px_rgb(82_82_82)]'
+              }`}
           >
-              Click To Automate?
+              {isAutomated ? '✓ Automated' : 'Click To Automate?'}
           </button>
         </div>
       )}

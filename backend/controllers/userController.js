@@ -28,7 +28,7 @@ const registerUser = async (req,res) => {
             password : hashpassword
         }
 
-        const newUser = new userModel(userData)
+        const newUser = new userModel(userData).select('-password')
         const user = await newUser.save()
         
         const token = jwt.sign({id:user._id}, process.env.JWT_SECRET)
@@ -43,7 +43,7 @@ const registerUser = async (req,res) => {
 const loginUser = async (req,res) => {
     try {
         const {email, password} = req.body
-        const user = await userModel.findOne({email})
+        const user = await userModel.findOne({email}).select('-password')
         if(!user) {
             return res.json({success:false,message:'User does not exist'})
         }
