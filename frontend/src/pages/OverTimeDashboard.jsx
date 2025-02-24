@@ -7,6 +7,25 @@ const OverTimeDashboard = ({selectedDay,overtimeData,calculateDuration,formatTim
     const {BACKEND_URL,token} = useContext(AppContext)
     const [editingLink, setEditingLink] = useState(false)
 
+    const handleOverTimeDelete = async (entry) => {
+      try {
+        const {data} = await axios.post(BACKEND_URL+'/api/user/delete-overtime', {
+          selectedDay,
+          date: entry.date,
+          startTime: entry.startTime,
+          endTime: entry.endTime
+        },{headers:{token}})
+        if(data.success){
+          toast.success(data.message)
+          getOvertimeData()
+        } else{
+          toast.error(data.message)
+        }
+      } catch (error) {
+        toast.error(error.message)
+      }
+    }
+
     // Add this new handler
     const handleOverTimeMeetingLinkEdit = async (entry, newLink) => {
         try {

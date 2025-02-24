@@ -1,6 +1,6 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  scheduleZoom: (timeSheet, overtimeData, zoomLink) => ipcRenderer.send('schedule-zoom', timeSheet,overtimeData, zoomLink),
+  scheduleZoom: (timeSheet, overtimeData) => ipcRenderer.send('schedule-zoom', timeSheet,overtimeData),
   onScheduleConfirm: (callback) => ipcRenderer.on('schedule-confirm', callback)
 });

@@ -99,10 +99,10 @@ const Dashboard = () => {
     },[overtimeData,timeSheet])
 
     const handleAutomation = async () => {
-        const zoomLink = "https://ccsf-edu.zoom.us/j/92121773277"; // Replace with actual Zoom link
+        // const zoomLink = "https://ccsf-edu.zoom.us/j/92121773277"; // Replace with actual Zoom link
         // scheduleZoomMeetings(timeSheet, overtimeData, zoomLink);
         try {
-          await scheduleZoomMeetings(timeSheet, overtimeData, zoomLink);
+          await scheduleZoomMeetings(timeSheet, overtimeData);
           setIsAutomated(true);
           toast.success('Zoom meetings scheduled successfully!');
         } catch (error) {

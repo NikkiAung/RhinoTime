@@ -1,4 +1,4 @@
-const scheduleZoomMeetings = (timeSheet, overtimeData, zoomLink) => {
+const scheduleZoomMeetings = (timeSheet, overtimeData) => {
     return new Promise((resolve, reject) => {
         if (!window.electronAPI) {
             console.error("🚨 window.electronAPI is undefined!");
@@ -16,7 +16,7 @@ const scheduleZoomMeetings = (timeSheet, overtimeData, zoomLink) => {
         });
 
         // Send schedule request
-        window.electronAPI.scheduleZoom(timeSheet, overtimeData, zoomLink);
+        window.electronAPI.scheduleZoom(timeSheet, overtimeData);
     });
 };
 

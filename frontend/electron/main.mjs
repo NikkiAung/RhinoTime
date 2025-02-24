@@ -64,11 +64,11 @@ function closeZoom() {
 app.whenReady().then(() => {
   createWindow()
   
-  ipcMain.on('schedule-zoom', (event, timeSheet, overtimeData, zoomLink) => {
-
+  ipcMain.on('schedule-zoom', (event, timeSheet, overtimeData) => {
+    console.log('schedule-zoom auto')
     try {
       // mainTime cron
-      for (const [day, { startTime, endTime }] of Object.entries(timeSheet)) {
+      for (const [day, { startTime, endTime, meetingLink }] of Object.entries(timeSheet)) {
         if(startTime === '00:00' && endTime === '00:00') {
           continue;
         }
@@ -77,7 +77,10 @@ app.whenReady().then(() => {
   
         cron.schedule(`${startMinute} ${startHour} * * ${getCronDay(day)}`, () => {
           console.log(`Starting Zoom Meeting for ${day} at ${startTime}`);
-          shell.openExternal(zoomLink);
+          console.log(meetingLink)
+          if (meetingLink && meetingLink.startsWith('http')) {
+            shell.openExternal(meetingLink);
+          }
         });
   
         cron.schedule(`${endMinute} ${endHour} * * ${getCronDay(day)}`, () => {
@@ -87,7 +90,7 @@ app.whenReady().then(() => {
       }
       // overTime cron
       for (const [day, overtimeEntries] of Object.entries(overtimeData)) {
-        overtimeEntries.forEach(({ date, startTime, endTime }) => {
+        overtimeEntries.forEach(({ date, startTime, endTime, meetingLink}) => {
           const [startHour, startMinute] = startTime.split(":").map(Number);
           const [endHour, endMinute] = endTime.split(":").map(Number);
           
@@ -95,7 +98,9 @@ app.whenReady().then(() => {
   
           cron.schedule(`${startMinute} ${startHour} ${dayNum} ${month} *`, () => {
             console.log(`Starting Overtime Zoom Meeting on ${date} at ${startTime}`);
-            shell.openExternal(zoomLink);
+            if (meetingLink && meetingLink.startsWith('http')) {
+              shell.openExternal(meetingLink);
+            }
           });
   
           cron.schedule(`${endMinute} ${endHour} ${dayNum} ${month} *`, () => {
