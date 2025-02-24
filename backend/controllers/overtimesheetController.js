@@ -122,4 +122,62 @@ const delOvertimeSheetData = async (req, res) => {
     }
 };
 
-export { uploadOvertimeSheetData, getOvertimeSheetData, delOvertimeSheetData };
+const updateOvertimeSheetMeetingLink = async (req, res) => {
+    try {
+        const { userId, date, startTime, endTime, selectedDay, meetingLink } = req.body;
+
+        // Validate required fields
+        if (!userId || !date || !startTime || !endTime || !selectedDay || !meetingLink) {
+            return res.json({ success: false, message: 'Invalid request data' });
+        }
+
+        // Find the user and ensure they exist
+        const user = await userModel.findById(userId).select('-password');
+        if (!user) {
+            return res.json({ success: false, message: 'User not found' });
+        }
+
+        // Ensure tutoring_overtime exists for the selected day
+        if (!user.tutoring_overtime?.[selectedDay]) {
+            return res.json({ success: false, message: `No overtime records for ${selectedDay}` });
+        }
+
+        // Find the specific overtime entry
+        const entryIndex = user.tutoring_overtime[selectedDay].findIndex(
+            entry => entry.date === date && entry.startTime === startTime && entry.endTime === endTime
+        );
+
+        if (entryIndex === -1) {
+            return res.json({ success: false, message: 'Overtime entry not found' });
+        }
+
+        // Use MongoDB's `findOneAndUpdate` for efficiency
+        const updatedUser = await userModel.findOneAndUpdate(
+            {
+                _id: userId,
+                [`tutoring_overtime.${selectedDay}.date`]: date,
+                [`tutoring_overtime.${selectedDay}.startTime`]: startTime,
+                [`tutoring_overtime.${selectedDay}.endTime`]: endTime,
+            },
+            {
+                $set: {
+                    [`tutoring_overtime.${selectedDay}.$.meetingLink`]: meetingLink
+                }
+            },
+            { new: true, runValidators: true }
+        ).select('-password');
+
+        if (!updatedUser) {
+            return res.json({ success: false, message: 'Failed to update meeting link' });
+        }
+
+        return res.json({ success: true, message: 'Meeting link updated successfully' });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+};
+
+
+export { uploadOvertimeSheetData, getOvertimeSheetData, delOvertimeSheetData, updateOvertimeSheetMeetingLink };

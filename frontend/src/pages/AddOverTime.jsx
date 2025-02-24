@@ -7,6 +7,7 @@ const AddOverTime = ({selectedDay,setAddOverTime,getOvertimeData}) => {
   const [startTime, setStartTime] = useState("")
   const [endTime, setEndTime] = useState("")
   const [date, setDate] = useState("")
+  const [overTimeMeetingLink,setOverTimeMeetingLink] = useState("")
   const {BACKEND_URL,token,setToken,getDateForDashBoard,timeSheet} = useContext(AppContext)
 
   const AddOverTime = async (e) => {
@@ -16,11 +17,11 @@ const AddOverTime = ({selectedDay,setAddOverTime,getOvertimeData}) => {
         date: date,
         startTime: startTime,
         endTime: endTime,
+        meetingLink: overTimeMeetingLink
       }
     }
     try {
       const {data} = await axios.post(BACKEND_URL + '/api/user/upload-overtime',{newOverTime},{headers:{token}})
-      console.log(data)
       if(data.success){
         setAddOverTime(false)
         getDateForDashBoard()
@@ -75,7 +76,19 @@ const AddOverTime = ({selectedDay,setAddOverTime,getOvertimeData}) => {
                   onChange={(e) => setEndTime(e.target.value)}
                 />
               </div>
-              
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Link</label>
+                <input 
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                  placeholder="https://zoom.us/j/example"
+                  value={overTimeMeetingLink}
+                  onChange={(e) => setOverTimeMeetingLink(e.target.value)}
+                />
+              </div>
+
               <div className="flex justify-end gap-3">
                 <button
                   type="button"

@@ -1,32 +1,38 @@
 import { toast } from "react-toastify"
-import { useContext } from "react"
+import { useContext, useState } from "react"
 import { AppContext } from "../contexts/AppContext"
 import axios from "axios"
 
 const OverTimeDashboard = ({selectedDay,overtimeData,calculateDuration,formatTime,setShowOvertimeView,getOvertimeData}) => {
-    const {BACKEND_URL,token,setToken,getDateForDashBoard,timeSheet,setTimeSheet} = useContext(AppContext)
+    const {BACKEND_URL,token} = useContext(AppContext)
+    const [editingLink, setEditingLink] = useState(false)
 
-    const handleOverTimeDelete = async (entry) => {
-      try {
-        const {data} = await axios.post(BACKEND_URL+'/api/user/delete-overtime', {
-          selectedDay,
-          date: entry.date,
-          startTime: entry.startTime,
-          endTime: entry.endTime
-        },{headers:{token}})
-        if(data.success){
-          toast.success(data.message)
-          getOvertimeData()
-        } else{
-          toast.error(data.message)
+    // Add this new handler
+    const handleOverTimeMeetingLinkEdit = async (entry, newLink) => {
+        try {
+            const {data} = await axios.post(BACKEND_URL+'/api/user/update-overtime-meeting-link', {
+                selectedDay,
+                date: entry.date,
+                startTime: entry.startTime,
+                endTime: entry.endTime,
+                meetingLink: newLink
+            }, {headers:{token}})
+            
+            if(data.success){
+                toast.success('Meeting link updated successfully')
+                getOvertimeData()
+            } else {
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error.message)
         }
-      } catch (error) {
-        toast.error(error.message)
-      }
+        setEditingLink(null)
     }
 
-  return (
-    <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center p-4 z-50">
+    // In your JSX, update the meeting link section
+    return (
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center p-4 z-50">
               <div className="bg-white/90 backdrop-blur-md rounded-xl p-6 w-full max-w-2xl shadow-xl border border-white/20 max-h-[80vh] flex flex-col">
                   <div className="flex justify-between items-center mb-6">
                       <h2 className="text-2xl font-bold text-gray-800">Overtime Hours - {selectedDay}</h2>
@@ -63,6 +69,30 @@ const OverTimeDashboard = ({selectedDay,overtimeData,calculateDuration,formatTim
                                     >
                                         🗑️ Delete
                                   </button>
+                              </div>
+                              <div className="mt-2 flex items-center">
+                                  <span className="font-medium">Meeting Link:</span>
+                                  {editingLink ? (
+                                      <input
+                                          type="text"
+                                          defaultValue={entry.meetingLink}
+                                          className="ml-2 flex-1 p-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                          autoFocus
+                                          onBlur={(e) => handleOverTimeMeetingLinkEdit(entry, e.target.value)}
+                                          onKeyDown={(e) => {
+                                              if (e.key === 'Enter') {
+                                                handleOverTimeMeetingLinkEdit(entry, e.target.value)
+                                              }
+                                          }}
+                                      />
+                                  ) : (
+                                      <span 
+                                          className="ml-2 cursor-pointer hover:bg-gray-100 px-2 py-1 rounded flex-1"
+                                          onDoubleClick={() => setEditingLink('true')}
+                                      >
+                                          {entry.meetingLink || 'No link set'}
+                                      </span>
+                                  )}
                               </div>
                           </div>
                       ))}

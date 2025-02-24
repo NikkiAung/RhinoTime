@@ -86,7 +86,6 @@ const updateTimeSheetData = async (req, res) => {
 const delTimeSheetData = async (req, res) => {
     try {
         const { userId } = req.body;
-        console.log(userId)
         if (!userId) {
             return res.status(400).json({ success: false, message: "Not Authorised!" });
         }
