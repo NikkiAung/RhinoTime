@@ -3,6 +3,7 @@ import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
 import { useNavigate } from "react-router";
 import { toast } from 'react-toastify';
+import SaveScheduleButton from '../components/SaveScheduleButton';
 
 const TutorSessionFrom = () => {
   const {BACKEND_URL,token,setToken,timeSheet} = useContext(AppContext)
@@ -17,6 +18,7 @@ const TutorSessionFrom = () => {
     Saturday: { startTime: '', endTime: '' },
     Sunday: { startTime: '', endTime: '' }
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (timeSheet && timeSheet !== null) {
@@ -36,18 +38,25 @@ const TutorSessionFrom = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     console.log(timeSheetState)
     try {
       console.log(token)
       const {data} = await axios.post(BACKEND_URL + '/api/user/upload-timesheet',{timeSheet : timeSheetState},{headers:{token}});
       console.log(data)
       if(data.success) {
-        navigate('/dashboard')
+        toast.success("Schedule saved! Redirecting...");
+        setTimeout(() => {
+          setIsLoading(false);
+          navigate("/dashboard");
+        }, 2000);
       } else{
         toast.error(data.message)
+        setIsLoading(false);
       }
     } catch (error) {
       toast.error(error.message)
+      setIsLoading(false);
     }
   };
 
@@ -82,13 +91,7 @@ const TutorSessionFrom = () => {
             </div>
           </div>
         ))}
-
-        <button 
-          type="submit"
-          className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors'
-        >
-          Save Schedule
-        </button>
+        <SaveScheduleButton isLoading={isLoading} />
       </form>
     </div>
   )

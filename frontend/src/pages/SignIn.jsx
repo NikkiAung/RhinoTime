@@ -3,6 +3,7 @@ import axios from 'axios';
 import { AppContext } from '../contexts/AppContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import Log_Sign_Button from '../components/Log_Sign_Button';
 
 const SignInPage = () => {
   const [state, setState] = useState('Sign Up');
@@ -20,6 +21,7 @@ const SignInPage = () => {
           if(data.success) {
             localStorage.setItem('token',data.token)
             setToken(data.token)
+            toast.success("Logged in successfully!")
           }else{
             toast.error(data.message)
           }
@@ -58,7 +60,7 @@ const SignInPage = () => {
     <div className="flex items-center justify-center mt-30">
         <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-sm">
           <h2 className="text-2xl font-semibold text-gray-800 mb-2">{state === 'Sign Up' ? 'Create Account' : 'Login'}</h2>
-          <p className="text-sm text-gray-500 mb-6">{state === 'Sign Up' ? 'Please sign up to book appointment' : 'Please log in to book appointment'}</p>
+          <p className="text-sm text-gray-500 mb-6">{state === 'Sign Up' ? 'Sign up to automate your tutoring session?' : 'Log in to automate your tutoring session?'}</p>
           <form onSubmit={formSubmitHandler}>
             {state === 'Sign Up' ? <div className="mb-4">
               <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
@@ -95,13 +97,9 @@ const SignInPage = () => {
                 required
               />
             </div>
-
-            <button
-              type="submit"
-              className="w-full bg-primary text-white py-2 rounded-lg hover:bg-blue-900 transition"
-            >
-              {state === 'Login' ? 'Login' :'Create account'}
-            </button>
+            <div className='flex justify-center mt-5'>
+              <Log_Sign_Button state={state}/>
+            </div>
           </form>
 
           <p className="text-sm text-gray-500 text-center mt-6">

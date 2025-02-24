@@ -7,9 +7,17 @@ export const AppContext = createContext();
 const AppContextProvider = (props) => {
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
-  const [token, setToken] = useState(localStorage.getItem('token')?localStorage.getItem('token'):false)
+  const [token, setToken] = useState(localStorage.getItem('token')?localStorage.getItem('token'):null)
 
   const [timeSheet, setTimeSheet] = useState(null);
+
+  useEffect(()=> {
+    if (token) {
+      localStorage.setItem('token', token)
+    } else {
+      localStorage.removeItem('token')
+    }
+  },[token])
 
   const getDateForDashBoard = async () => {
     try {
@@ -25,7 +33,7 @@ const AppContextProvider = (props) => {
         setTimeSheet(null)
         toast.error(error.message)
     }
-}
+  }
 
     const value = {
         BACKEND_URL,

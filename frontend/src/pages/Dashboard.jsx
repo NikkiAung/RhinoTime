@@ -7,6 +7,8 @@ import AddOverTime from './AddOverTime'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom';
+import LogOutButton from '../components/LogOutButton'
+import DeleteButton from '../components/DeleteButton'
 
 const Dashboard = () => {
     const {BACKEND_URL,token,setToken,getDateForDashBoard,timeSheet, setTimeSheet} = useContext(AppContext)
@@ -85,13 +87,16 @@ const Dashboard = () => {
     };
 
     useEffect(()=>{
-        getDateForDashBoard()
-        getOvertimeData(); 
+        if (token && token !== 'null') {
+          getDateForDashBoard()
+          getOvertimeData()
+        }
     },[token])
 
     useEffect(()=> {
       setIsAutomated(false)
     },[overtimeData,timeSheet])
+
     const handleAutomation = async () => {
         const zoomLink = "https://ccsf-edu.zoom.us/j/92121773277"; // Replace with actual Zoom link
         // scheduleZoomMeetings(timeSheet, overtimeData, zoomLink);
@@ -104,16 +109,43 @@ const Dashboard = () => {
         }
     };
 
+    const logOut = () => {
+      let countdown = 3; // Start countdown from 2 seconds
+    
+      const toastId = toast.success(`Logging out in ${countdown}...`, {
+        autoClose: false, // Prevent auto-close
+      });
+    
+      const interval = setInterval(() => {
+        countdown -= 1;
+        toast.update(toastId, {
+          render: `Logging out in ${countdown}...`,
+        });
+    
+        if (countdown === 0) {
+          clearInterval(interval);
+          toast.update(toastId, {
+            render: 'Logged out successfully!',
+            autoClose: 3000, // Close after 3 seconds
+          });
+    
+          // Perform logout
+          localStorage.removeItem('token');
+          setToken(null);
+          navigate('/', { replace: true });
+        }
+      }, 1000);
+    };
+    
+
   return (
     <div className="p-6 max-w-4xl mx-auto">
       {/* title & del */}
       <div className='flex justify-between items-center'>
         <h1 className="font-serif text-3xl font-bold text-gray-800 mb-6">Tutoring Schedule</h1>
-        <div 
-          className="bg-red-500 px-4 py-1 rounded-full text-white font-semibold text-lg shadow-md transition duration-300 ease-in-out transform hover:bg-red-600 hover:scale-105 active:scale-95 focus:ring-4 focus:ring-red-300 cursor-pointer select-none"
-          onClick={deleteAllTime}
-        >
-          🗑️ Delete All Schedule?
+        <div className='flex gap-2 mt-[-20px]'>
+          <LogOutButton onClick={logOut}/>
+          <DeleteButton onClick={deleteAllTime}/>
         </div>
       </div>
       {/* cards */}
