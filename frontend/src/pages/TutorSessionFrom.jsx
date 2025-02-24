@@ -9,6 +9,7 @@ const TutorSessionFrom = () => {
   const {BACKEND_URL,token,setToken,timeSheet} = useContext(AppContext)
   const navigate = useNavigate();
   const daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const [meetingLink, setMeetingLinkLink] = useState('');
   const [timeSheetState, setTimeSheet] = useState({
     Monday: { startTime: '', endTime: '' },
     Tuesday: { startTime: '', endTime: '' },
@@ -35,15 +36,26 @@ const TutorSessionFrom = () => {
       }
     }));
   };
+  
+  const handleMeetingLinkChange = (value) => {
+    setTimeSheet(prev => {
+      const updatedTimeSheet = { ...prev };
+      Object.keys(updatedTimeSheet).forEach(day => {
+        updatedTimeSheet[day] = {
+          ...updatedTimeSheet[day],
+          meetingLink: value
+        };
+      });
+      return updatedTimeSheet;
+    });
+  };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    console.log(timeSheetState)
     try {
-      console.log(token)
       const {data} = await axios.post(BACKEND_URL + '/api/user/upload-timesheet',{timeSheet : timeSheetState},{headers:{token}});
-      console.log(data)
       if(data.success) {
         toast.success("Schedule saved! Redirecting...");
         setTimeout(() => {
@@ -91,6 +103,20 @@ const TutorSessionFrom = () => {
             </div>
           </div>
         ))}
+        <div className="bg-white rounded-lg flex items-center gap-30">
+          <span className="text-gray-700 font-medium whitespace-nowrap">Meeting Link</span>
+          <input
+            type="url"
+            value={meetingLink}
+            onChange={(e) => {
+              setMeetingLinkLink(e.target.value);
+              handleMeetingLinkChange(e.target.value);
+            }}
+            className="p-2 border rounded-md flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="https://zoom.us/j/example"
+            required
+          />
+        </div>
         <SaveScheduleButton isLoading={isLoading} />
       </form>
     </div>

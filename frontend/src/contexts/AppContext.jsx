@@ -11,6 +11,8 @@ const AppContextProvider = (props) => {
 
   const [timeSheet, setTimeSheet] = useState(null);
 
+  const [userName, setUserName] = useState('')
+
   useEffect(()=> {
     if (token) {
       localStorage.setItem('token', token)
@@ -25,6 +27,7 @@ const AppContextProvider = (props) => {
         if(data.success) {
             const hasTimeSheet = data.timeSheet && Object.keys(data.timeSheet).length > 0;
             setTimeSheet(hasTimeSheet ? data.timeSheet : null)
+            setUserName(data.name)
         } else{
             setTimeSheet(null)
             toast.error(data.message)
@@ -41,7 +44,8 @@ const AppContextProvider = (props) => {
         setToken,
         getDateForDashBoard,
         timeSheet,
-        setTimeSheet
+        setTimeSheet,
+        userName
     }
   return (
     <AppContext.Provider value={value}>

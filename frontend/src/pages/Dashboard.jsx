@@ -9,9 +9,10 @@ import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom';
 import LogOutButton from '../components/LogOutButton'
 import DeleteButton from '../components/DeleteButton'
+import MeetingLinkDisplay from './MeetingLinkDisplay'
 
 const Dashboard = () => {
-    const {BACKEND_URL,token,setToken,getDateForDashBoard,timeSheet, setTimeSheet} = useContext(AppContext)
+    const {BACKEND_URL,token,setToken,getDateForDashBoard,timeSheet,setTimeSheet,userName} = useContext(AppContext)
     const [addOverTime, setAddOverTime] = useState(false);
     const [selectedDay, setSelectedDay] = useState(null);
     const [showOvertimeView, setShowOvertimeView] = useState(false);
@@ -19,6 +20,7 @@ const Dashboard = () => {
     const [overtimeData,setOvertimeData] = useState({});
     const navigate = useNavigate();
     const [isAutomated, setIsAutomated] = useState(false);
+    const [showMeetingLink,setShowMeetingLink] = useState(false);
 
     // updating main time sheet
     const handleTimeEdit = async (day, field, value) => {
@@ -61,7 +63,6 @@ const Dashboard = () => {
     }
 
     // delete all time
-    // Fix the deleteAllTime function
     const deleteAllTime = async () => {
         try {
             const { data } = await axios.post(
@@ -142,7 +143,7 @@ const Dashboard = () => {
     <div className="p-6 max-w-4xl mx-auto">
       {/* title & del */}
       <div className='flex justify-between items-center'>
-        <h1 className="font-serif text-3xl font-bold text-gray-800 mb-6">Tutoring Schedule</h1>
+        <h1 className="font-serif text-3xl font-bold text-gray-800 mb-6">{userName}'s Schedule</h1>
         <div className='flex gap-2 mt-[-20px]'>
           <LogOutButton onClick={logOut}/>
           <DeleteButton onClick={deleteAllTime}/>
@@ -226,33 +227,44 @@ const Dashboard = () => {
                 </div>
               </div>
               {/* AddOverTime + ShowOverTime Div */}
-              <div>
-                  <button 
-                      onClick={() => {
-                          setSelectedDay(day);
-                          setAddOverTime(true);
-                      }}
-                      className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                      title="Add extra time"
-                      >
-                      <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                      </svg>
-                  </button>
-                  {overtimeData[day]?.length > 0 && (
-                      <button
-                          onClick={() => {
-                              setSelectedDay(day);
-                              setShowOvertimeView(true);
-                          }}
-                          className="p-1 hover:bg-amber-100 rounded-full transition-colors"
-                          title="View overtime entries"
-                      >
-                          <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                          </svg>
-                      </button>
-                  )}
+              <div className='flex flex-col'>
+                  <div>
+                    <button 
+                        onClick={() => {
+                            setSelectedDay(day);
+                            setAddOverTime(true);
+                        }}
+                        className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                        title="Add extra time"
+                        >
+                        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                    </button>
+                    {overtimeData[day]?.length > 0 && (
+                        <button
+                            onClick={() => {
+                                setSelectedDay(day);
+                                setShowOvertimeView(true);
+                            }}
+                            className="p-1 hover:bg-amber-100 rounded-full transition-colors"
+                            title="View overtime entries"
+                        >
+                            <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </button>
+                    )}
+                  </div>
+                  <div>
+                    <button className='hover:bg-gray-100 rounded-full transition-colors flex-wrap' onClick={()=>
+                      {
+                        setSelectedDay(day)
+                        setShowMeetingLink(true)
+                      }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 24 24"><path fill="currentColor" d="M10.616 16.077H7.077q-1.692 0-2.884-1.192T3 12t1.193-2.885t2.884-1.193h3.539v1H7.077q-1.27 0-2.173.904Q4 10.731 4 12t.904 2.173t2.173.904h3.539zM8.5 12.5v-1h7v1zm4.885 3.577v-1h3.538q1.27 0 2.173-.904Q20 13.269 20 12t-.904-2.173t-2.173-.904h-3.538v-1h3.538q1.692 0 2.885 1.192T21 12t-1.193 2.885t-2.884 1.193z"/></svg>
+                    </button>
+                  </div>
               </div>
             </div>
           
@@ -280,9 +292,17 @@ const Dashboard = () => {
           getOvertimeData={getOvertimeData}
         />
       )}
+
+      {showMeetingLink &&
+        <MeetingLinkDisplay
+          selectedDay={selectedDay}
+          setShowMeetingLink={setShowMeetingLink}
+          specificDayMeetingLink={timeSheet[selectedDay]?.meetingLink || ''}
+        />
+      }
       
       {/* Remove or conditionally render the automation button */}
-      {!addOverTime && (
+      {!addOverTime && !showMeetingLink && (
         <div className="flex justify-center mt-6">
           <button 
               onClick={handleAutomation}

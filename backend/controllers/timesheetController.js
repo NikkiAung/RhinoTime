@@ -47,7 +47,7 @@ const getTimeSheetData = async (req,res) => {
             return res.json({success:false,message:"User Doesn't Exist!"})
         }
 
-        return res.json({ success: true, timeSheet : userData.tutoring_date_and_time });
+        return res.json({ success: true, timeSheet : userData.tutoring_date_and_time, name : userData.name });
 
     } catch (error) {
         console.log(error);
@@ -85,7 +85,6 @@ const updateTimeSheetData = async (req, res) => {
 
 const delTimeSheetData = async (req, res) => {
     try {
-      console.log('del data from backend')
         const { userId } = req.body;
         console.log(userId)
         if (!userId) {
@@ -111,9 +110,35 @@ const delTimeSheetData = async (req, res) => {
 
         return res.json({ success: true, message: "Time deleted successfully!" });
     } catch (error) {
-        console.error("Error deleting time:", error);
         return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 };
 
-export {uploadTimeSheetData,getTimeSheetData,updateTimeSheetData,delTimeSheetData}  
+const updateTimeSheetMeetingLink = async (req, res) => {
+  try {
+    const { userId, meetingLink, selectedDay } = req.body;
+
+    // Validate input
+    if (!userId || !meetingLink || !selectedDay) {
+      return res.status(400).json({ success: false, message: "Missing required fields" });
+    }
+
+    // Update the meeting link for the specific day
+    const updatedUser = await userModel.findByIdAndUpdate(
+      userId,
+      { $set: { [`tutoring_date_and_time.${selectedDay}.meetingLink`]: meetingLink } }, 
+      { new: true, runValidators: true } // Returns updated document
+    ).select('-password');
+
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    return res.json({ success: true, message: `Meeting link updated for ${selectedDay}`});
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+}
+
+export {uploadTimeSheetData,getTimeSheetData,updateTimeSheetData,delTimeSheetData,updateTimeSheetMeetingLink}  
