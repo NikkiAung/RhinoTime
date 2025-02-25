@@ -40,7 +40,7 @@ function createWindow() {
     mainWindow.loadURL('http://localhost:5173')
   } else {
     // In production, load the built files
-    mainWindow.loadFile('dist/index.html')
+    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'))
   }
 
   // Open DevTools in development cmd+opt+I
