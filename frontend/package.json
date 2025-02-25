@@ -2,13 +2,70 @@
   "name": "rhinotime",
   "private": true,
   "type": "module",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "author": "Aung Nanda Oo",
   "scripts": {
-    "dev": "concurrently \"npm:dev:vite\" \"npm:dev:electron\"",
+    "dev": "concurrently \"npm run dev:vite\" \"npm run dev:electron\"",
     "dev:vite": "vite",
     "dev:electron": "NODE_ENV=DEV electron electron/main.mjs",
-    "build": "vite build",
+    "build": "vite build && electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
     "start": "electron electron/main.js"
+  },
+  "repository": "https://github.com/NikkiAung/RhinoTime",
+  "publish": {
+    "provider": "github",
+    "releaseType": "release"
+  },
+  "build": {
+    "appId": "com.rhinotime.app",
+    "productName": "RhinoTime",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "build/icons/mac/icon.icns",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icons/win/icon.ico",
+      "publisherName": "Aung Nanda Oo",
+      "requestedExecutionLevel": "requireAdministrator"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb",
+        "rpm"
+      ],
+      "icon": "build/icons/linux",
+      "category": "Utility"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "build/icons/",
+        "to": "icons",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
   },
   "dependencies": {
     "@electron/remote": "^2.1.2",
@@ -19,6 +76,7 @@
     "@tailwindcss/vite": "^4.0.6",
     "axios": "^1.7.9",
     "daypilot-pro-react": "^0.0.0",
+    "electron-updater": "^6.3.9",
     "electron-windows-notifications": "^3.0.8",
     "node-cron": "^3.0.3",
     "path": "^0.12.7",
@@ -37,6 +95,7 @@
     "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
     "electron": "^34.1.1",
+    "electron-builder": "^25.1.8",
     "electron-icon-maker": "^0.0.5",
     "eslint": "^9.19.0",
     "eslint-plugin-react": "^7.37.4",

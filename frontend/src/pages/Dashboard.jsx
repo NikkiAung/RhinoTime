@@ -21,6 +21,7 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const [isAutomated, setIsAutomated] = useState(false);
     const [showMeetingLink,setShowMeetingLink] = useState(false);
+    const [updateMessage, setUpdateMessage] = useState('');
 
     // updating main time sheet
     const handleTimeEdit = async (day, field, value) => {
@@ -98,6 +99,20 @@ const Dashboard = () => {
       setIsAutomated(false)
     },[overtimeData,timeSheet])
 
+    useEffect(()=>{
+      if(window.electronAPI) {
+        window.electronAPI.updateMessage((message)=>{
+          setUpdateMessage(message)
+          toast.info(message)
+        })
+        return () => {
+          if (window.electronAPI) {
+            window.electronAPI.updateMessage(()=>{});
+          }
+        }
+      }
+    },[])
+
     const handleAutomation = async () => {
         // const zoomLink = "https://ccsf-edu.zoom.us/j/92121773277"; // Replace with actual Zoom link
         // scheduleZoomMeetings(timeSheet, overtimeData, zoomLink);
@@ -141,6 +156,19 @@ const Dashboard = () => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
+      {updateMessage && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg shadow-sm">
+          <div className="flex items-center space-x-3">
+            <svg className="w-5 h-5 text-blue-500 animate-spin" viewBox="0 0 24 24">
+              <path
+                fill="currentColor"
+                d="M12 4V2A10 10 0 0 0 2 12h2a8 8 0 0 1 8-8Z"
+              />
+            </svg>
+            <span className="text-blue-700">{updateMessage}</span>
+          </div>
+        </div>
+      )}
       {/* title & del */}
       <div className='flex justify-between items-center'>
         <h1 className="font-serif text-3xl font-bold text-gray-800 mb-6">{userName}'s Schedule</h1>

@@ -3,12 +3,19 @@ import path from 'path'
 import { fileURLToPath } from 'url';
 import cron from 'node-cron'
 import { exec } from 'child_process';
+import pkg from 'electron-updater';
+const { autoUpdater } = pkg;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+autoUpdater.autoDownload = false;
+autoUpdater.autoInstallOnAppQuit = true;
+
+let mainWindow;
+
 function createWindow() {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     icon : process.platform === 'darwin' 
@@ -21,6 +28,13 @@ function createWindow() {
     }
   })
 
+  mainWindow.webContents.on('did-finish-load', () => {
+    if (process.env.NODE_ENV !== 'DEV') {
+      autoUpdater.checkForUpdates();
+      showMessage(`Checking for updates. Current Version is ${app.getVersion()}`);
+    }
+  });
+
   // In development, load from the Vite dev server
   if (process.env.NODE_ENV === 'DEV') {
     mainWindow.loadURL('http://localhost:5173')
@@ -29,10 +43,15 @@ function createWindow() {
     mainWindow.loadFile('dist/index.html')
   }
 
-  // Open DevTools in development
+  // Open DevTools in development cmd+opt+I
   if (process.env.NODE_ENV === 'DEV') {
     mainWindow.webContents.openDevTools()
   }
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+
 }
 
 // Function to convert days to cron format (Sunday = 0, Monday = 1, etc.)
@@ -64,11 +83,43 @@ function closeZoom() {
   }
 }
 
+//func to show message
+function showMessage(message) {
+  if (mainWindow && mainWindow.webContents) {
+    mainWindow.webContents.send('updateMessage', message);
+  }
+}
+
+/* New Update Available */
+autoUpdater.on("update-available", (info) => {
+  showMessage(`Update available. Current Version is ${app.getVersion()}`);
+  autoUpdater.downloadUpdate();
+});
+
+autoUpdater.on("update-not-available", (info) => {
+  showMessage(`No update available. Current Version is ${app.getVersion()}`);
+});
+
+autoUpdater.on("update-downloaded", () => {
+  showMessage(`Update downloaded. Current Version is ${app.getVersion()}`);
+  setTimeout(() => {
+    autoUpdater.quitAndInstall();
+  }, 3000);
+});
+
+autoUpdater.on("download-progress", (progressObj) => {
+  showMessage(`Downloading update ${Math.round(progressObj.percent)}%`);
+});
+
+/* Error Handling */
+autoUpdater.on("error", (info) => {
+  showMessage(`Error: ${info}`);
+});
+
 app.whenReady().then(() => {
   createWindow()
 
   ipcMain.on('schedule-zoom', (event, timeSheet, overtimeData) => {
-    console.log('schedule-zoom auto')
     try {
       // mainTime cron
       for (const [day, { startTime, endTime, meetingLink }] of Object.entries(timeSheet)) {
@@ -118,15 +169,22 @@ app.whenReady().then(() => {
     } catch (error) {
       event.reply('schedule-confirm', { success: false, error: error.message });
     }
-});
+  }); // <-- End of ipcMain.on
 
-app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow()
-    }
+  app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow()
+      }
   })
 })
 
+app.on('before-quit', () => {
+  mainWindow = null;
+});
+
 app.on('window-all-closed', () => {
-    app.quit()
+  // On macOS, it's common for applications to quit only when the user explicitly quits
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }  
 })
