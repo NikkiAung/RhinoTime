@@ -11,9 +11,12 @@ function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    icon : process.platform === 'darwin' 
+      ? path.join(__dirname, 'build/icons/mac/icon.icns') 
+      : path.join(__dirname, 'build/icons/win/icon.ico'),
     webPreferences: {
       nodeIntegration: false,
-      contextIsolation: true,
+      contextIsolation: true, 
       preload: path.join(__dirname, 'preload.js'),
     }
   })
@@ -63,7 +66,7 @@ function closeZoom() {
 
 app.whenReady().then(() => {
   createWindow()
-  
+
   ipcMain.on('schedule-zoom', (event, timeSheet, overtimeData) => {
     console.log('schedule-zoom auto')
     try {
