@@ -6,7 +6,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   
   onScheduleConfirm: (callback) => {
     ipcRenderer.removeAllListeners('schedule-confirm'); // Prevent duplicate listeners
-    ipcRenderer.on('schedule-confirm', (_event, data) => callback(data));
+    ipcRenderer.on('schedule-confirm', (_event, data) => {
+      console.log('Schedule confirmation received:', data); // For debugging
+      callback(data);
+    });
   },
 
   // Checking for Updates

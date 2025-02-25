@@ -114,16 +114,23 @@ const Dashboard = () => {
     },[])
 
     const handleAutomation = async () => {
-        // const zoomLink = "https://ccsf-edu.zoom.us/j/92121773277"; // Replace with actual Zoom link
-        // scheduleZoomMeetings(timeSheet, overtimeData, zoomLink);
-        try {
-          await scheduleZoomMeetings(timeSheet, overtimeData);
-          setIsAutomated(true);
-          toast.success('Zoom meetings scheduled successfully!');
-        } catch (error) {
-            toast.error(error.message);
-        }
-    };
+      try {
+        // Send the scheduling request
+        window.electronAPI.scheduleZoom(timeSheet, overtimeData);
+        
+        // Listen for the confirmation
+        window.electronAPI.onScheduleConfirm((data) => {
+          if (data.success) {
+            setIsAutomated(true);
+            toast.success('Zoom meetings scheduled successfully!');
+          } else {
+            toast.error(data.error || 'Failed to schedule meetings');
+          }
+        });
+      } catch (error) {
+        toast.error(error.message);
+      }
+  };
 
     const logOut = () => {
       let countdown = 3; // Start countdown from 2 seconds
