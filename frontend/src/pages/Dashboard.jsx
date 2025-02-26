@@ -22,6 +22,7 @@ const Dashboard = () => {
     const [isAutomated, setIsAutomated] = useState(false);
     const [showMeetingLink,setShowMeetingLink] = useState(false);
     const [updateMessage, setUpdateMessage] = useState('');
+    const [loading, setLoading] = useState(false)
 
     // updating main time sheet
     const handleTimeEdit = async (day, field, value) => {
@@ -101,9 +102,11 @@ const Dashboard = () => {
 
     useEffect(()=>{
       if(window.electronAPI) {
+        setLoading(true)
         window.electronAPI.updateMessage((message)=>{
           setUpdateMessage(message)
           toast.info(message)
+          setLoading(false)
         })
         return () => {
           if (window.electronAPI) {
@@ -166,12 +169,14 @@ const Dashboard = () => {
       {updateMessage && (
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg shadow-sm">
           <div className="flex items-center space-x-3">
-            <svg className="w-5 h-5 text-blue-500 animate-spin" viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M12 4V2A10 10 0 0 0 2 12h2a8 8 0 0 1 8-8Z"
-              />
-            </svg>
+            {loading && (
+              <svg className="w-5 h-5 text-blue-500 animate-spin" viewBox="0 0 24 24">
+                <path
+                  fill="currentColor"
+                  d="M12 4V2A10 10 0 0 0 2 12h2a8 8 0 0 1 8-8Z"
+                />
+              </svg>
+            )}
             <span className="text-blue-700">{updateMessage}</span>
           </div>
         </div>
