@@ -2,7 +2,7 @@
   "name": "rhinotime",
   "private": true,
   "type": "module",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "Aung Nanda Oo",
   "scripts": {
     "dev": "concurrently \"npm run dev:vite\" \"npm run dev:electron\"",
@@ -42,12 +42,13 @@
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
       "identity": null,
-      "signIgnore": [".*\\.js", ".*\\.htm", ".*\\.html", ".*\\.json", ".*\\.css", ".*\\.svg"],
+      "signIgnore": ["**/*"],
       "asarUnpack": ["**/*.node"],
       "extendInfo": {
         "NSAppleEventsUsageDescription": "Please allow access to system events",
         "NSCameraUsageDescription": "Please allow access to camera",
-        "NSMicrophoneUsageDescription": "Please allow access to microphone"
+        "NSMicrophoneUsageDescription": "Please allow access to microphone",
+        "NSSystemAdministrationUsageDescription": "Explain why app needs admin access"
       }
     },
     "win": {
