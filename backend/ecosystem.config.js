@@ -1,7 +1,7 @@
-module.export = {
+module.exports = {
     apps: [
       {
-        name: "project-management",
+        name: "RhinoTime",
         script: "npm",
         args: "run dev",
         env: {
