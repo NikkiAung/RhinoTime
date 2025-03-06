@@ -17,7 +17,9 @@ RhinoTime is a **cross-platform** desktop application built with **Electron and 
 - ✅ **AWS Deployment**: Backend hosted on **AWS EC2**, ensuring high availability and zero downtime.
 - ✅ **User-Friendly Interface**: Built with **React, Tailwind CSS, and Material UI**.
 
-## 📷 Project Vd Demo:  [RhinoTime Vd Demo](https://drive.google.com/file/d/1_UBr2Ana0qq-Afh3AEaADkJhHO5VkrJ5/view)
+## 📷 Project Vd Demo:  
+#### 1 min quickDemo [RhinoTime Vd Demo](https://drive.google.com/file/d/1_UBr2Ana0qq-Afh3AEaADkJhHO5VkrJ5/view)
+#### 4 mins lofiDemo [RhinoTime Vd Demo](https://drive.google.com/file/d/1Bji2vO1ToLQrzcDRP9of5VOQKozrIfSZ/view?usp=sharing)
 
 ### 1️⃣ Clone the Repository
 ```sh
